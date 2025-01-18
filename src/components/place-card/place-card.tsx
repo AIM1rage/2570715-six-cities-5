@@ -1,6 +1,15 @@
-﻿import {Offer} from '@/api/types.ts';
-import {Link} from 'react-router-dom';
+﻿import {Link, useNavigate} from 'react-router-dom';
 import {AppRoute} from '@/constants/app-routes.ts';
+import {Offer} from '@/types/api.ts';
+import {capitalize} from '@/utils/utils.ts';
+import {memo} from 'react';
+import {AuthorizationStatus} from '@/constants/auth-status.ts';
+import {
+  postSwitchFavoriteStatus
+} from '@/store/api-actions.ts';
+import {useAppSelector} from '@/hooks/use-app-selector.tsx';
+import {getAuthorizationStatus} from '@/store/app-user/selectors.ts';
+import {useAppDispatch} from '@/hooks/use-app-dispatch.tsx';
 
 export interface PlaceCardProps {
   offer: Offer;
@@ -9,7 +18,20 @@ export interface PlaceCardProps {
   height: number;
 }
 
-export default function PlaceCard({offer, page, width, height} : PlaceCardProps): JSX.Element {
+function PlaceCard({offer, page, width, height}: PlaceCardProps): JSX.Element {
+  const dispatch = useAppDispatch();
+
+  const authorizationStatus = useAppSelector(getAuthorizationStatus);
+  const navigate = useNavigate();
+
+  const handleSwitchFavoriteStatus = () => {
+    if (authorizationStatus !== AuthorizationStatus.Auth) {
+      navigate(AppRoute.Login);
+      return;
+    }
+    dispatch(postSwitchFavoriteStatus(offer));
+  };
+
   return (
     <article className={`${page}__card place-card`}>
       {offer.isPremium &&
@@ -38,6 +60,7 @@ export default function PlaceCard({offer, page, width, height} : PlaceCardProps)
           <button
             className={`place-card__bookmark-button${offer.isFavorite && '--active'} button`}
             type="button"
+            onClick={handleSwitchFavoriteStatus}
           >
             <svg
               className="place-card__bookmark-icon"
@@ -51,7 +74,7 @@ export default function PlaceCard({offer, page, width, height} : PlaceCardProps)
         </div>
         <div className="place-card__rating rating">
           <div className="place-card__stars rating__stars">
-            <span style={{width: `${offer.rating * 100 / 5}%`}}/>
+            <span style={{width: `${Math.round(offer.rating) * 100 / 5}%`}}/>
             <span className="visually-hidden">Rating</span>
           </div>
         </div>
@@ -60,7 +83,11 @@ export default function PlaceCard({offer, page, width, height} : PlaceCardProps)
             {offer.title}
           </Link>
         </h2>
-        <p className="place-card__type">{offer.type}</p>
+        <p className="place-card__type">{capitalize(offer.type)}</p>
       </div>
     </article>);
 }
+
+const MemoizedPlaceCard = memo(PlaceCard, (prevProps, nextProps) =>
+  JSON.stringify(prevProps.offer) === JSON.stringify(nextProps.page));
+export default MemoizedPlaceCard;

@@ -6,22 +6,21 @@ import PrivateRoute from '@/components/private-route/private-route.tsx';
 import FavoritesScreen from '@/pages/favorites-screen/favorites-screen.tsx';
 import {AppRoute} from '@/constants/app-routes.ts';
 import NotFoundScreen from '@/pages/not-found-screen/not-found-screen.tsx';
-import {offers} from '@/mocks/offers.ts';
 
 export default function App(): JSX.Element {
   return (
     <BrowserRouter>
       <Routes>
         <Route path={AppRoute.Root}>
-          <Route index element={<MainScreen offers={offers}/>}/>
+          <Route index element={<MainScreen/>}/>
           <Route path={AppRoute.Login} element={<LoginScreen/>}/>
           <Route path={AppRoute.Offer}>
             <Route index element={<OfferScreen/>}/>
             <Route path=':id' element={<OfferScreen/>}/>
           </Route>
           <Route path={AppRoute.Favorites} element={
-            <PrivateRoute hasAccess>
-              <FavoritesScreen offers={offers}/>
+            <PrivateRoute>
+              <FavoritesScreen/>
             </PrivateRoute>
           }
           />

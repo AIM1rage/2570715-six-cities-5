@@ -1,21 +1,29 @@
-﻿export enum OfferType {
-  Apartment = 'Apartment',
-  Room = 'Room'
-}
+import {Token} from '@/api/token.ts';
+
+export type OfferType = string;
+export type Image = string;
+export type Url = string;
+export type Guid = string;
+export type Good = string;
+export type Email = string;
 
 export type Offer = {
-  id: string;
+  id: Guid;
   type: OfferType;
   isFavorite: boolean;
   isPremium: boolean;
   price: number;
   rating: number;
   title: string;
-  previewImage: string;
+  previewImage: Image;
   description: string;
   bedrooms: number;
   maxAdults: number;
   city: City;
+  location: Location;
+  images: Image[];
+  host: User;
+  goods: Good[];
 };
 
 export type Location = {
@@ -30,15 +38,17 @@ export type City = {
 };
 
 export type Comment = {
-  id: string;
+  id: Guid;
   date: string;
   user: User;
   comment: string;
   rating: number;
-}
+};
 
 export type User = {
   name: string;
-  avatarUrl: string;
+  email: Email;
+  avatarUrl: Url;
   isPro: boolean;
-}
+  token: Token;
+};

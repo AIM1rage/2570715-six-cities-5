@@ -1,48 +1,27 @@
 import Footer from '@/components/footer/footer.tsx';
 import Header from '@/components/header/header.tsx';
-import {Offer} from '@/api/types.ts';
-import {groupBy} from '@/utils/utils.ts';
-import {Link} from 'react-router-dom';
-import {AppRoute} from '@/constants/app-routes.ts';
-import PlaceCard from '@/components/place-card/place-card.tsx';
+import EmptyFavoriteOfferList from '@/components/empty-favorite-offer-list/empty-favorite-offer-list.tsx';
+import FavoriteOfferList from '@/components/favorite-offer-list/favorite-offer-list.tsx';
+import Spinner from '@/components/spinner/spinner.tsx';
+import {useAppSelector} from '@/hooks/use-app-selector.tsx';
+import {getFavoriteOffers, getFavoriteOffersIsLoading} from '@/store/favorite-offers/selectors.ts';
 
-export interface FavoritesScreenProps {
-  offers: Offer[];
-}
-
-export default function FavoritesScreen({offers}: FavoritesScreenProps): JSX.Element {
-  const groupedCityOffers = groupBy(offers, (offer) => offer.city.name, (offer) => offer);
-
-  const cityOffers = Object.keys(groupedCityOffers).map((city) => (
-    <li className="favorites__locations-items" key={city}>
-      <div className="favorites__locations locations locations--current">
-        <div className="locations__item">
-          <Link className="locations__item-link" to={AppRoute.Root}>
-            <span>{city}</span>
-          </Link>
-        </div>
-      </div>
-      <div className="favorites__places">
-        {groupedCityOffers[city]
-          .filter((offer) => offer.isFavorite)
-          .map((offer) =>
-            <PlaceCard offer={offer} page={'favorites'} width={150} height={110} key={offer.id}/>)}
-      </div>
-    </li>));
+export default function FavoritesScreen(): JSX.Element {
+  const favoriteOffers = useAppSelector(getFavoriteOffers);
+  const isLoading = useAppSelector(getFavoriteOffersIsLoading);
+  const offerListEmpty = !isLoading && favoriteOffers.length === 0;
 
   return (
-    <div className="page">
+    <div className={`page ${offerListEmpty && 'page--favorites-empty'}`}>
       <Header/>
-      <main className="page__main page__main--favorites">
-        <div className="page__favorites-container container">
-          <section className="favorites">
-            <h1 className="favorites__title">Saved listing</h1>
-            <ul className="favorites__list">
-              {cityOffers}
-            </ul>
-          </section>
-        </div>
-      </main>
+      {isLoading || !favoriteOffers ? <Spinner/> :
+        <main className={`page__main page__main--favorites ${offerListEmpty && 'page__main--favorites-empty'}`}>
+          <div className="page__favorites-container container">
+            {offerListEmpty
+              ? <EmptyFavoriteOfferList/>
+              : <FavoriteOfferList offers={favoriteOffers}/>}
+          </div>
+        </main>}
       <Footer/>
     </div>);
 }

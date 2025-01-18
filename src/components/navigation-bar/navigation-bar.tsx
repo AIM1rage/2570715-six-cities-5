@@ -1,41 +1,51 @@
 ﻿import {Link} from 'react-router-dom';
 import {AppRoute} from '@/constants/app-routes.ts';
+import {logoutAction} from '@/store/api-actions.ts';
+import {Email, Url} from '@/types/api.ts';
+import {useAppDispatch} from '@/hooks/use-app-dispatch.tsx';
+import {memo} from 'react';
 
 interface NavigationBarProps {
-  logged?: boolean;
+  avatarUrl: Url;
+  email: Email;
+  favoriteOffersCount: number;
 }
 
-export default function NavigationBar({logged}: NavigationBarProps) {
-  if (!logged) {
-    return (
-      <nav className="header__nav">
-        <ul className="header__nav-list">
-          <li className="header__nav-item user">
-            <Link to={AppRoute.Login} className="header__nav-link header__nav-link--profile">
-              <div className="header__avatar-wrapper user__avatar-wrapper">
-              </div>
-              <span className="header__login">Sign in</span>
-            </Link>
-          </li>
-        </ul>
-      </nav>);
-  }
+function NavigationBar({avatarUrl, email, favoriteOffersCount}: NavigationBarProps) {
+  const dispatch = useAppDispatch();
+  const handleSignOut = () => {
+    dispatch(logoutAction());
+  };
+
   return (
     <nav className="header__nav">
       <ul className="header__nav-list">
         <li className="header__nav-item user">
           <Link to={AppRoute.Favorites} className="header__nav-link header__nav-link--profile">
             <div className="header__avatar-wrapper user__avatar-wrapper">
+              <img
+                className="user__avatar"
+                src={avatarUrl}
+                width={54}
+                height={54}
+                alt="User avatar"
+              />
             </div>
-            <span className="header__user-name user__name">Oliver.conner@gmail.com</span>
-            <span className="header__favorite-count">0</span>
+            <span className="header__user-name user__name">{email}</span>
+            <span className="header__favorite-count">{favoriteOffersCount}</span>
           </Link>
         </li>
         <li className="header__nav-item">
-          <a className="header__nav-link" href="#">
+          <a
+            className="header__nav-link"
+            onClick={handleSignOut}
+          >
             <span className="header__signout">Sign out</span>
           </a>
         </li>
       </ul>
     </nav>);
 }
+
+const MemoizedNavigationBar = memo(NavigationBar);
+export default MemoizedNavigationBar;
